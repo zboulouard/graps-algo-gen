@@ -106,12 +106,13 @@ public class Business {
 	}
 	
 	// Force de répulsion globale calculée pour des fins d'évaluation pour l'algorithme génétique
-	public void forceRepGlobale() {
+	public Double forceRepGlobale() {
 		Double frg = 0.0;
 		for(int i=0; i<listForcesRep.size(); i++) {
 			frg += listForcesRep.get(i);
 		}
 		System.out.println("Force de Réplusion Globale : " + frg);
+		return frg;
 	}
 	
 	// Force de réplusion moyenne calculée pour des fins d'évaluation pour l'algorithme génétique
@@ -134,12 +135,13 @@ public class Business {
 	}
 	
 	// Force d'attraction globale calculée pour des fins d'évaluation pour l'algorithme génétique
-	public void forceAttrGlobale() {
+	public Double forceAttrGlobale() {
 		Double fag = 0.0;
 		for(int i=0; i<listForcesAttr.size(); i++) {
 			fag += listForcesAttr.get(i);
 		}
 		System.out.println("Force d'Attraction Globale : " + fag);
+		return fag;
 	}
 	
 	// Force d'attraction moyenne calculée pour des fins d'évaluation pour l'algorithme génétique
