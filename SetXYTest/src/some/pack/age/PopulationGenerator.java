@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.graphstream.algorithm.generator.Generator;
+import org.graphstream.algorithm.generator.RandomGenerator;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.MultiGraph;
@@ -39,8 +40,8 @@ public class PopulationGenerator {
 	// Cette fonction génére une population de "totalPop" graphes.
 	private void popGen(int totalPop) {
 		for (int i = 0; i < totalPop; i++) {
-			Graph graph = new MultiGraph("Dorogovtsev mendes");
-			Generator gen = new DMCoordGen();
+			Graph graph = new MultiGraph("Rand Graph");
+			Generator gen = new RandCoordGen();
 			gen.addSink(graph);
 			gen.begin();
 			for (int j = 0; j < 5; j++) {			// Boucle sur le nombre de noeuds du graphe

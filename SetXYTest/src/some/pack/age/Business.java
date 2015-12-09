@@ -47,9 +47,13 @@ public class Business {
 	private Double distance(Node n1, Node n2) {
 		Double d = 0.0;
 		Edge e = n1.getEdgeBetween(n2);
-		try {
-			d = GraphPosLengthUtils.edgeLength(e);
-		} catch (Exception e2) {}
+		if(e==null) {
+			d = distEuc(n1, n2);
+		} else {
+			try {
+				d = GraphPosLengthUtils.edgeLength(e);
+			} catch (Exception e2) {}
+		}
 		return d;
 	}
 	
@@ -100,7 +104,6 @@ public class Business {
 	public Double repulsion(Node n1, Node n2) {
 		Double rep = 0.0;
 		rep = Math.pow(K, 2) / distEuc(n1, n2);
-		System.out.println("Répulsion : " + rep);
 		listForcesRep.add(rep);
 		return rep;
 	}
@@ -129,7 +132,6 @@ public class Business {
 	public Double attraction(Node n1, Node n2) {
 		Double attr = 0.0;
 		attr = -Math.pow(K, 2) / distance(n1, n2);
-		System.out.println("Attraction : " + attr);
 		listForcesAttr.add(attr);
 		return attr;
 	}
@@ -158,7 +160,7 @@ public class Business {
 		Collection<Node> n0 = graph.getNodeSet();
 		do {
 			for(int i=0; i<graph.getNodeCount(); i++) {
-				double f = 0.0;
+				Double f = 0.0;
 				for(int j=0; j<graph.getNodeCount(); j++) {
 					if(j==i) {
 						continue;
