@@ -7,6 +7,7 @@ public class Test {
 		algoGen.population();
 		algoGen.fitnessEvaluation();
 		algoGen.selection();
+		algoGen.crossOver();
 		System.out.println("");
 	}
 
