@@ -43,10 +43,8 @@ public class AlgoGen {
 	
 	public void selection() {
 		int best = pop.size() / 10;
-		//List<Graph> bestGraphs = new ArrayList<Graph>();
 		Arrays.sort(forceEval, Collections.reverseOrder());
 		for(int i=0; i<best; i++) {
-			//bestGraphs.add(forceGraph.get(forceEval[i]));
 			bestGraphs.put(forceEval[i], forceGraph.get(forceEval[i]));
 		}
 	}
@@ -60,9 +58,9 @@ public class AlgoGen {
 				listItr.next();
 			} else {
 				Graph g1 = listItr.previous();
+				listItr.next();
 				Graph g2 = listItr.next();
 				croisementGraphs(g1, g2);
-				listItr.next();
 			}
 		}
 		System.out.println("");
@@ -113,7 +111,7 @@ public class AlgoGen {
 			System.out.println("");
 		}
 		System.out.println("*****");
-		System.out.println("Après");
+		System.out.println("AprÃ¨s");
 		System.out.println("*****");
 		System.out.println("PGPC 1 :");
 		System.out.println("--------");

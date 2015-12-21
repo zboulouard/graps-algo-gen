@@ -2,16 +2,15 @@ package some.pack.age;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
-import org.graphstream.algorithm.generator.Generator;
-import org.graphstream.algorithm.generator.RandomGenerator;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.MultiGraph;
 
 /*
- * Cette classe génére une population de "totalPop" graphes, utilisée comme population initiale pour 
- * l'algorithme génétique.
+ * Cette classe gÃ©nÃ©re une population de "totalPop" graphes, utilisÃ©e comme population initiale pour 
+ * l'algorithme gÃ©nÃ©tique.
  * 
  */
 public class PopulationGenerator {
@@ -19,14 +18,16 @@ public class PopulationGenerator {
 	// Nombre total de la population des graphes.
 	private int totalPop;
 	
-	// Population des graphes générés.
+	// Population des graphes gÃ©nÃ©rÃ©s.
 	private List<Graph> graphPop;
+	
+	private Random random;
 
 	public PopulationGenerator() {
 		super();
+		random = new Random();
 		graphPop = new ArrayList<Graph>();
 		popGen(100);
-		//showPop();
 	}
 
 	public PopulationGenerator(int totalPop) {
@@ -34,31 +35,38 @@ public class PopulationGenerator {
 		graphPop = new ArrayList<Graph>();
 		this.totalPop = totalPop;
 		popGen(this.totalPop);
-		//showPop();
 	}
 	
-	// Cette fonction génére une population de "totalPop" graphes.
+	// Cette fonction gÃ©nÃ¨re une population de "totalPop" graphes.
 	private void popGen(int totalPop) {
 		for (int i = 0; i < totalPop; i++) {
-			Graph graph = new MultiGraph("Rand Graph");
-			Generator gen = new RandCoordGen();
-			gen.addSink(graph);
-			gen.begin();
-			for (int j = 0; j < 5; j++) {			// Boucle sur le nombre de noeuds du graphe
-				gen.nextEvents();
-			}
-			gen.end();
+			this.random = this.random == null ? new Random(
+					System.currentTimeMillis()) : this.random;
+			Graph graph = new MultiGraph("Graph " + i);
+			Node a = graph.addNode("A");
+			a.addAttribute("xy", random.nextDouble(), random.nextDouble());
+			Node b = graph.addNode("B");
+			b.addAttribute("xy", random.nextDouble(), random.nextDouble());
+			Node c = graph.addNode("C");
+			c.addAttribute("xy", random.nextDouble(), random.nextDouble());
+			Node d = graph.addNode("D");
+			d.addAttribute("xy", random.nextDouble(), random.nextDouble());
+			Node e = graph.addNode("E");
+			e.addAttribute("xy", random.nextDouble(), random.nextDouble());
+			graph.addEdge("AB", a, b);
+			graph.addEdge("BC", b, c);
+			graph.addEdge("CA", c, a);
+			graph.addEdge("DE", d, e);
 			graphPop.add(graph);
 		}
 	}
 	
-	// Cette fonction affiche les coordonnées des noeuds des graphes de la population
+	// Cette fonction affiche les coordonnÃ©es des noeuds des graphes de la population
 	public void showPop() {
 		for (int i = 0; i < graphPop.size(); i++) {
 			System.out.println("*******************");
 			System.out.println("Graphe " + i + " : ");
 			System.out.println("*******************");
-			//Collection<Node> nodes = graphPop.get(i).getNodeSet();
 			System.out.println("Number of nodes : " + graphPop.get(i).getNodeCount());
 			for (int j = 0; j < graphPop.get(i).getNodeCount(); j++) {
 				Node nodeJ = graphPop.get(i).getNode(j);
@@ -67,8 +75,6 @@ public class PopulationGenerator {
 				Double x = attributes[0];
 				Double y = attributes[1];
 				System.out.println(x + " , " + y);
-//				double[] position = GraphPosLengthUtils.nodePosition(nodeJ);
-//				System.out.println(position[0] + " , " + position[1]);
 			}
 		}
 	}
