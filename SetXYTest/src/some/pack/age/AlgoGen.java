@@ -2,7 +2,6 @@ package some.pack.age;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
@@ -15,7 +14,7 @@ import org.graphstream.graph.Node;
 public class AlgoGen {
 	
 	private List<Graph> pop;
-	private Double[] forceEval;
+	private Double[] energieEval;
 	private Map<Double, Graph> forceGraph;
 	private Map<Double, Graph> bestGraphs;
 	
@@ -28,24 +27,31 @@ public class AlgoGen {
 	public void population() {
 		PopulationGenerator generator = new PopulationGenerator(100);
 		pop = generator.getGraphPop();
-		forceEval = new Double[pop.size()];
+//		forceEval = new Double[pop.size()];
+		System.out.println("Début");
+		System.out.println("*****");
+		System.out.println("Taille : " + pop.size());
 	}
 	
 	public void fitnessEvaluation() {
+		energieEval = new Double[pop.size()];
 		for(int i=0; i<pop.size(); i++) {
 			Business business = new Business(pop.get(i));
 			business.FDP(pop.get(i), 1.0);
-			Double forceGlobaleGraph = Math.abs(business.forceAttrGlobale()) + Math.abs(business.forceRepGlobale());
-			forceEval[i] = forceGlobaleGraph;
-			forceGraph.put(forceGlobaleGraph, pop.get(i));
+			//Double forceGlobaleGraph = Math.abs(business.forceAttrGlobale()) + Math.abs(business.forceRepGlobale());
+			//System.out.println(pop.get(i) + " , " + business.forceAttrGlobale() + " , " + business.forceRepGlobale());
+			Double energieGlobaleGraph = business.energieGlobale();
+			System.out.println(pop.get(i) + " , " + business.energieGlobale());
+			energieEval[i] = energieGlobaleGraph;
+			forceGraph.put(energieGlobaleGraph, pop.get(i));
 		}
 	}
 	
 	public void selection() {
 		int best = pop.size() / 10;
-		Arrays.sort(forceEval, Collections.reverseOrder());
+		Arrays.sort(energieEval);
 		for(int i=0; i<best; i++) {
-			bestGraphs.put(forceEval[i], forceGraph.get(forceEval[i]));
+			bestGraphs.put(energieEval[i], forceGraph.get(energieEval[i]));
 		}
 	}
 	
@@ -63,37 +69,22 @@ public class AlgoGen {
 				croisementGraphs(g1, g2);
 			}
 		}
+		System.out.println("Fin");
+		System.out.println("***");
+		System.out.println("Taille : " + pop.size());
 		System.out.println("");
 	}
 	
-	public void mutation() {
-		
+	private void mutation(Graph g) {
+		Business business = new Business(g);
+		business.FDP(g, 1.0);
 	}
 	
 	private void croisementGraphs(Graph g1, Graph g2) {
-		System.out.println("*****");
-		System.out.println("Avant");
-		System.out.println("*****");
 		ConnectedComponents ccs1 = new ConnectedComponents(g1);
 		List<Node> pgpc1 = ccs1.getGiantComponent();
-		System.out.println("PGPC 1 :");
-		System.out.println("--------");
-        for(Node n : pgpc1) {
-    		Object[] attr = n.getAttribute("xy");
-			Double x = (Double) attr[0];
-			Double y = (Double) attr[1];
-			System.out.println(x + " , " + y);
-        }
 		ConnectedComponents ccs2 = new ConnectedComponents(g2);
 		List<Node> pgpc2 = ccs2.getGiantComponent();
-		System.out.println("PGPC 2 :");
-		System.out.println("--------");
-        for(Node n : pgpc2) {
-    		Object[] attr = n.getAttribute("xy");
-			Double x = (Double) attr[0];
-			Double y = (Double) attr[1];
-			System.out.println(x + " , " + y);
-        }
         // Croisement des pgpc
 		int min = Integer.min(pgpc1.size(), pgpc2.size());
 		for(int i=0; i<min; i++) {
@@ -107,27 +98,19 @@ public class AlgoGen {
 			attr2[1] = ye;
 			pgpc1.get(i).setAttribute("xy", (Object) attr1[0], (Object) attr1[1]);
 			pgpc2.get(i).setAttribute("xy", (Object) attr2[0], (Object) attr2[1]);
-			// Tester si le changement a eu lieu au niveau de tout le graphe et non pas uniquement au niveau de la pgpc
-			System.out.println("");
 		}
-		System.out.println("*****");
-		System.out.println("Après");
-		System.out.println("*****");
-		System.out.println("PGPC 1 :");
-		System.out.println("--------");
-        for(Node n : pgpc1) {
-    		Object[] attr = n.getAttribute("xy");
-			Double x = (Double) attr[0];
-			Double y = (Double) attr[1];
-			System.out.println(x + " , " + y);
-        }
-		System.out.println("PGPC 2 :");
-		System.out.println("--------");
+		// Remplacement des pgpc
         for(Node n : pgpc2) {
-    		Object[] attr = n.getAttribute("xy");
-			Double x = (Double) attr[0];
-			Double y = (Double) attr[1];
-			System.out.println(x + " , " + y);
+        	ccs1.getGiantComponent().set(n.getIndex(), n);
         }
+        for(Node n : pgpc1) {
+        	ccs2.getGiantComponent().set(n.getIndex(), n);
+        }
+        // Mutation des nouveaux graphes
+        mutation(g1);
+        mutation(g2);
+        // Ajout des nouveaux graphes à la population
+        pop.add(g1);
+        pop.add(g2);
 	}
 }

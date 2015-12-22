@@ -11,24 +11,27 @@ import org.graphstream.ui.graphicGraph.GraphPosLengthUtils;
 
 public class Business {
 	
-	// Constante nominale représentant la taille au repos du ressort
+	// Constante nominale reprÃ©sentant la taille au repos du ressort
 	private Double K;
 	
-	// Liste des valeurs des forces de répulsion appliquées 
-	// utilisée pour calculer la force de répulsion globale et moyenne
+	// Liste des valeurs des forces de rÃ©pulsion appliquÃ©es 
+	// utilisÃ©e pour calculer la force de rÃ©pulsion globale et moyenne
 	private List<Double> listForcesRep;
 	
-	// Liste des valeurs des forces d'attraction appliquées 
-	// utilisée pour calculer la force d'attraction globale et moyenne
+	// Liste des valeurs des forces d'attraction appliquÃ©es 
+	// utilisÃ©e pour calculer la force d'attraction globale et moyenne
 	private List<Double> listForcesAttr;
+	
+	// Liste des Ã©nergies appliquÃ©es au niveau des noeuds
+	// utilisÃ©e pour calculer l'Ã©nergie globale
+	private List<Double> listEnergies;
 	
 	public Business(Graph graph) {
 		super();
 		this.K = moyenne(graph);
 		listForcesRep = new ArrayList<Double>();
 		listForcesAttr = new ArrayList<Double>();
-//		repulsion(graph);
-//		attraction(graph);
+		listEnergies = new ArrayList<Double>();
 	}
 	
 	public Business() {
@@ -100,7 +103,7 @@ public class Business {
 		return moy;
 	}
 	
-	// Force de répulsion calculée selon l'équation : Fr(n1, n2) = K²/dist(n1, n2)
+	// Force de rÃ©pulsion calculÃ©e selon l'Ã©quation : Fr(n1, n2) = KÂ²/dist(n1, n2)
 	public Double repulsion(Node n1, Node n2) {
 		Double rep = 0.0;
 		rep = Math.pow(K, 2) / distEuc(n1, n2);
@@ -108,27 +111,27 @@ public class Business {
 		return rep;
 	}
 	
-	// Force de répulsion globale calculée pour des fins d'évaluation pour l'algorithme génétique
+	// Force de rÃ©pulsion globale calculÃ©e pour des fins d'Ã©valuation pour l'algorithme gÃ©nÃ©tique
 	public Double forceRepGlobale() {
 		Double frg = 0.0;
 		for(int i=0; i<listForcesRep.size(); i++) {
 			frg += listForcesRep.get(i);
 		}
-		System.out.println("Force de Réplusion Globale : " + frg);
+		//System.out.println("Force de RÃ©plusion Globale : " + frg);
 		return frg;
 	}
 	
-	// Force de réplusion moyenne calculée pour des fins d'évaluation pour l'algorithme génétique
+	// Force de rÃ©plusion moyenne calculÃ©e pour des fins d'Ã©valuation pour l'algorithme gÃ©nÃ©tique
 	public void forceRepMoyenne() {
 		Double frm = 0.0;
 		for(int i=0; i<listForcesRep.size(); i++) {
 			frm += listForcesRep.get(i) / listForcesRep.size();
 		}
-		System.out.println("Force de Répulsion Moyenne : " + frm);
+		System.out.println("Force de RÃ©pulsion Moyenne : " + frm);
 	}
 	
-	// Force d'attraction calculée au niveau des noeuds deux à deux voisins 
-	// selon l'équation : Fa(n1, n2) = -dist²(n1, n2)/K
+	// Force d'attraction calculÃ©e au niveau des noeuds deux Ã©deux voisins 
+	// selon l'Ã©quation : Fa(n1, n2) = -distÂ²(n1, n2)/K
 	public Double attraction(Node n1, Node n2) {
 		Double attr = 0.0;
 		attr = -Math.pow(K, 2) / distance(n1, n2);
@@ -136,23 +139,48 @@ public class Business {
 		return attr;
 	}
 	
-	// Force d'attraction globale calculée pour des fins d'évaluation pour l'algorithme génétique
+	// Force d'attraction globale calculÃ©e pour des fins d'Ã©valuation pour l'algorithme gÃ©nÃ©tique
 	public Double forceAttrGlobale() {
 		Double fag = 0.0;
 		for(int i=0; i<listForcesAttr.size(); i++) {
 			fag += listForcesAttr.get(i);
 		}
-		System.out.println("Force d'Attraction Globale : " + fag);
+		//System.out.println("Force d'Attraction Globale : " + fag);
 		return fag;
 	}
 	
-	// Force d'attraction moyenne calculée pour des fins d'évaluation pour l'algorithme génétique
+	// Force d'attraction moyenne calculÃ©e pour des fins d'Ã©valuation pour l'algorithme gÃ©nÃ©tique
 	public void forceAttrMoyenne() {
 		Double fam = 0.0;
 		for(int i=0; i<listForcesAttr.size(); i++) {
 			fam += listForcesAttr.get(i) / listForcesAttr.size();
 		}
 		System.out.println("Force d'Attraction Moyenne : " + fam);
+	}
+	
+	// Expression d'Ã©nÃ©rgie
+	public void energie(Node n1, Node n2) {
+		Double energie = 0.0;
+		Edge e = n1.getEdgeBetween(n2);
+		if(e==null) {
+			energie = Math.pow(distEuc(n1, n2), 3) / (3 * K);
+		} else {
+			try {
+				energie = -Math.pow(K, 2) * Math.log(distance(n1, n2));
+			} catch (Exception e2) {}
+		}
+		//System.out.println("Energie : " + energie);
+		listEnergies.add(energie);
+	}
+	
+	// Energie globale calculÃ©e pour des fins d'Ã©valuation pour l'algorithme gÃ©nÃ©tique
+	public Double energieGlobale() {
+		Double eng = 0.0;
+		for(int i=0; i<listEnergies.size(); i++) {
+			eng += listEnergies.get(i);
+		}
+		//System.out.println("Energie Globale : " + eng);
+		return eng;
 	}
 	
 	public void FDP(Graph graph, Double tolerence) {
@@ -190,14 +218,7 @@ public class Business {
 							attr[1] = y;
 							graph.getNode(j).setAttribute("xy", (Object) attr[0], (Object) attr[1]);
 						}
-//						Object[] attr = graph.getNode(j).getAttribute("xy");
-//						Double x = (Double) attr[0];
-//						Double y = (Double) attr[1];
-//						x = x + step * (f / Math.abs(f));
-//						y = y + step * (f / Math.abs(f));
-//						attr[0] = x;
-//						attr[1] = y;
-//						graph.getNode(j).setAttribute("xy", (Object) attr[0], (Object) attr[1]);
+						energie(graph.getNode(i), graph.getNode(j));
 					} catch(Exception e) {
 						e.printStackTrace();
 					}
