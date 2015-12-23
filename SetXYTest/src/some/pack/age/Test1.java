@@ -13,7 +13,7 @@ public class Test1 {
 		/*
 		 * 1) FDP
 		 * 2) Fonction
-		 * 3) Algo Gen (énérgie)
+		 * 3) Algo Gen (énérgie) : greedy acceptance
 		 * 4) 3D
 		 * 
 		 */

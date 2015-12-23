@@ -13,17 +13,24 @@ import org.graphstream.graph.Node;
 
 public class AlgoGen {
 	
+	// Population
 	private List<Graph> pop;
+	// Tableau des énergies utilisé pour évaluation
 	private Double[] energieEval;
-	private Map<Double, Graph> forceGraph;
+	// Tableau contenant les meilleurs graphes de chaque itération
+	private Double[] bestOfTheBest;
+	// Map contenant les graphes ainsi que leurs énergies
+	private Map<Double, Graph> energieGraph;
+	// Map contenant les meilleurs graphes ainsi que leurs énergies
 	private Map<Double, Graph> bestGraphs;
 	
 	public AlgoGen() {
 		pop = new ArrayList<Graph>();
-		forceGraph = new HashMap<Double, Graph>();
+		energieGraph = new HashMap<Double, Graph>();
 		bestGraphs = new HashMap<Double, Graph>();
 	}
 
+	// Génération de la population initiale
 	public void population() {
 		PopulationGenerator generator = new PopulationGenerator(100);
 		pop = generator.getGraphPop();
@@ -33,28 +40,43 @@ public class AlgoGen {
 		System.out.println("Taille : " + pop.size());
 	}
 	
+	// Evaluation de la fitness
 	public void fitnessEvaluation() {
 		energieEval = new Double[pop.size()];
 		for(int i=0; i<pop.size(); i++) {
 			Business business = new Business(pop.get(i));
 			business.FDP(pop.get(i), 1.0);
-			//Double forceGlobaleGraph = Math.abs(business.forceAttrGlobale()) + Math.abs(business.forceRepGlobale());
-			//System.out.println(pop.get(i) + " , " + business.forceAttrGlobale() + " , " + business.forceRepGlobale());
 			Double energieGlobaleGraph = business.energieGlobale();
-			System.out.println(pop.get(i) + " , " + business.energieGlobale());
+			//System.out.println(pop.get(i) + " , " + business.energieGlobale());
 			energieEval[i] = energieGlobaleGraph;
-			forceGraph.put(energieGlobaleGraph, pop.get(i));
+			energieGraph.put(energieGlobaleGraph, pop.get(i));
 		}
 	}
 	
+	// Sélection pour croisement
 	public void selection() {
 		int best = pop.size() / 10;
 		Arrays.sort(energieEval);
 		for(int i=0; i<best; i++) {
-			bestGraphs.put(energieEval[i], forceGraph.get(energieEval[i]));
+			bestGraphs.put(energieEval[i], energieGraph.get(energieEval[i]));
 		}
 	}
 	
+	// Sélection du graphe final pour chaque itération (à modifier pour sélectionner le meilleur graphe)
+	public void finalSelection() {
+//		System.out.println("----------------------------");
+//		System.out.println("Les meilleurs graphes sont :");
+//		System.out.println("----------------------------");
+//		for(Double key : bestGraphs.keySet()) {
+//			System.out.println(key + " , " + bestGraphs.get(key));
+//		}
+		System.out.println("------------------------");
+		System.out.println("Le meilleur graphe est :");
+		System.out.println("------------------------");
+		System.out.println(energieEval[0] + " , " + bestGraphs.get(energieEval[0]));
+	}
+	
+	// Croisement
 	public void crossOver() {
 		List<Graph> graphs = new ArrayList<Graph>();
 		graphs.addAll(bestGraphs.values());
@@ -75,11 +97,45 @@ public class AlgoGen {
 		System.out.println("");
 	}
 	
+	// Mutation et Greedy Acceptance
 	private void mutation(Graph g) {
 		Business business = new Business(g);
 		business.FDP(g, 1.0);
+		//greedyAcceptance(g);
+		Double energieg = business.energieGlobale();
+		for(Double key : energieGraph.keySet()) {
+			if(energieg >= key) {
+				continue;
+			} else {
+				//System.out.println("Graphe supprimé");
+//				bestGraphs.remove(key);
+//				key = energieg;
+				pop.add(g);
+				energieGraph.put(key, g);
+				pop.remove(energieGraph.get(key));
+//				energieGraph.remove(key);
+				//System.out.println("Graphe ajouté");
+				break;
+			}
+		}
 	}
 	
+	private void greedyAcceptance(Graph g) {
+		Business business = new Business(g);
+		Double energieg = business.energieGlobale();
+		for(Double key : energieGraph.keySet()) {
+			if(energieg < key) {
+				pop.remove(energieGraph.get(key));
+				energieGraph.remove(key);
+//				key = energieg;
+				pop.add(g);
+				energieGraph.put(energieg, g);
+				break;
+			}
+		}
+	}
+	
+	// Croisement effectif
 	private void croisementGraphs(Graph g1, Graph g2) {
 		ConnectedComponents ccs1 = new ConnectedComponents(g1);
 		List<Node> pgpc1 = ccs1.getGiantComponent();
@@ -110,7 +166,7 @@ public class AlgoGen {
         mutation(g1);
         mutation(g2);
         // Ajout des nouveaux graphes à la population
-        pop.add(g1);
-        pop.add(g2);
+//        pop.add(g1);
+//        pop.add(g2);
 	}
 }
